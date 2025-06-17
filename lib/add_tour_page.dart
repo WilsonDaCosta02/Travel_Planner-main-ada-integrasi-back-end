@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'trip_model.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:project_travelplanner/services/region_service.dart';
 
 class AddTourPage extends StatefulWidget {
   final Function(Trip)? onAddTour;
@@ -31,6 +32,26 @@ class _AddTourPageState extends State<AddTourPage> {
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
+
+  List<String> _provinces = [];
+  String? _selectedProvince;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProvinces();
+  }
+
+  void _loadProvinces() async {
+    try {
+      final data = await fetchProvinces();
+      setState(() {
+        _provinces = data;
+      });
+    } catch (e) {
+      print('Gagal memuat data provinsi: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -66,7 +87,7 @@ class _AddTourPageState extends State<AddTourPage> {
               null,
               _tourAboutController,
             ),
-            _buildLabeledField('Location', Icons.search, _locationController),
+            _buildProvinceDropdown(),
             _buildLabeledField(
               'Remarks',
               null,
@@ -163,6 +184,44 @@ class _AddTourPageState extends State<AddTourPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProvinceDropdown() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: DropdownButtonFormField<String>(
+        value: _selectedProvince,
+        items:
+            _provinces.map((prov) {
+              return DropdownMenuItem(value: prov, child: Text(prov));
+            }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedProvince = value;
+            _locationController.text = value ?? '';
+          });
+        },
+        decoration: InputDecoration(
+          labelText: 'Location (Province)',
+          labelStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color.fromARGB(255, 210, 210, 210),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Color(0xFFFFFADD)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Colors.white),
+          ),
+        ),
+        dropdownColor: const Color.fromARGB(255, 3, 49, 77),
+        style: const TextStyle(color: Color(0xFFFFFADD)),
+        iconEnabledColor: const Color(0xFFFFFADD),
       ),
     );
   }

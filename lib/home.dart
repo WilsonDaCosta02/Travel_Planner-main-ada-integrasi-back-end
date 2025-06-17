@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
     ];
 
     return Scaffold(
-      extendBody: true,
+      backgroundColor: const Color.fromARGB(255, 34, 102, 141),
       body: pages[_selectedIndex],
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.only(

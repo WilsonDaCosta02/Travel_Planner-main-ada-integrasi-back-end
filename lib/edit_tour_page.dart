@@ -7,6 +7,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'trip_model.dart';
 import 'home.dart';
 import 'dart:ui'; // For ImageFilter
+import 'package:project_travelplanner/services/region_service.dart';
 
 class EditTourPage extends StatefulWidget {
   final Trip trip;
@@ -30,9 +31,13 @@ class _EditTourPageState extends State<EditTourPage> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _remarksController = TextEditingController();
 
+  List<String> _provinces = [];
+  String? _selectedProvince;
+
   @override
   void initState() {
     super.initState();
+    _loadProvinces();
 
     _rangeStart = widget.trip.dateRange.start;
     _rangeEnd = widget.trip.dateRange.end;
@@ -43,6 +48,20 @@ class _EditTourPageState extends State<EditTourPage> {
     _remarksController.text = widget.trip.remarks;
     _dateController.text =
         "${_rangeStart!.day}/${_rangeStart!.month}/${_rangeStart!.year} - ${_rangeEnd!.day}/${_rangeEnd!.month}/${_rangeEnd!.year}";
+  }
+
+  void _loadProvinces() async {
+    try {
+      final data = await fetchProvinces(); // Sama seperti di AddTourPage
+      setState(() {
+        _provinces = data;
+        if (_provinces.contains(widget.trip.location)) {
+          _selectedProvince = widget.trip.location;
+        }
+      });
+    } catch (e) {
+      print('Gagal memuat data provinsi: $e');
+    }
   }
 
   @override
@@ -76,7 +95,7 @@ class _EditTourPageState extends State<EditTourPage> {
               null,
               _tourAboutController,
             ),
-            _buildLabeledField('Location', Icons.search, _locationController),
+            _buildProvinceDropdown(),
             _buildLabeledField(
               'Remarks',
               null,
@@ -229,6 +248,44 @@ class _EditTourPageState extends State<EditTourPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProvinceDropdown() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: DropdownButtonFormField<String>(
+        value: _selectedProvince,
+        items:
+            _provinces.map((prov) {
+              return DropdownMenuItem(value: prov, child: Text(prov));
+            }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedProvince = value;
+            _locationController.text = value ?? '';
+          });
+        },
+        decoration: InputDecoration(
+          labelText: 'Location (Province)',
+          labelStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color.fromARGB(255, 210, 210, 210),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Color(0xFFFFFADD)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Colors.white),
+          ),
+        ),
+        dropdownColor: const Color.fromARGB(255, 3, 49, 77),
+        style: const TextStyle(color: Color(0xFFFFFADD)),
+        iconEnabledColor: const Color(0xFFFFFADD),
       ),
     );
   }

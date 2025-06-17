@@ -345,28 +345,6 @@ class _DreamDestinationPageState extends State<DreamDestinationPage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: Color(0xFF225B75),
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_location_alt_rounded),
-            label: '',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 1) {
-            _showDestinationDialog();
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/mytrip');
-          }
-        },
-      ),
     );
   }
 }

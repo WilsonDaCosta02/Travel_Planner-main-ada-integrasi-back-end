@@ -7,7 +7,11 @@ class TourDetailPage extends StatelessWidget {
   final Trip trip;
   final int tripIndex;
 
-  const TourDetailPage({super.key, required this.trip, required this.tripIndex});
+  const TourDetailPage({
+    super.key,
+    required this.trip,
+    required this.tripIndex,
+  });
 
   String formatDateRange(DateTimeRange range) {
     final formatter = DateFormat('MMM d');
@@ -217,7 +221,11 @@ class TourDetailSheet extends StatelessWidget {
   final Trip trip;
   final int tripIndex;
 
-  const TourDetailSheet({super.key, required this.trip, required this.tripIndex});
+  const TourDetailSheet({
+    super.key,
+    required this.trip,
+    required this.tripIndex,
+  });
 
   String formatDateRange(DateTimeRange range) {
     final formatter = DateFormat('MMM d');
@@ -277,7 +285,7 @@ class TourDetailSheet extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Image.asset(
-                          'assets/images/mytrip_${(tripIndex % 6) + 1}.jpg',
+                          'assets/images/${trip.location.trim().toUpperCase()}.jpg',
                           height: MediaQuery.of(context).size.height * 0.3,
                           width: double.infinity,
                           fit: BoxFit.cover,

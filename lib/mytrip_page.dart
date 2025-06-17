@@ -117,16 +117,8 @@ class _MytripPageState extends State<MytripPage> {
                   final Trip trip = trips[index];
                   final dateRange = trip.dateRange;
 
-                  final List<String> tripImages = [
-                    'assets/images/mytrip_1.jpg',
-                    'assets/images/mytrip_2.jpg',
-                    'assets/images/mytrip_3.jpg',
-                    'assets/images/mytrip_4.jpg',
-                    'assets/images/mytrip_5.jpg',
-                    'assets/images/mytrip_6.jpg',
-                  ];
-
-                  final imageAsset = tripImages[index % tripImages.length];
+                  final imageAsset =
+                      'assets/images/${trip.location.trim().toUpperCase()}.jpg';
 
                   return GestureDetector(
                     onTap: () {
