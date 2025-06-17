@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:project_travelplanner/graphql/query/getUser.dart';
+import 'package:project_travelplanner/graphql/query/myTrip.dart';
 import 'package:project_travelplanner/trip_data.dart';
 import 'add_tour_page.dart';
 import 'profil.dart';
@@ -27,8 +29,30 @@ class _HomePageState extends State<HomePage> {
   bool _isLoadingUser = true;
 
   // ✅ Tambahkan di sini
-  List<Trip> _tripList = [];
+  List<Trip> parsedTrips = [];
   bool _isLoadingTrips = true;
+
+  Map<DateTime, List<String>> _eventMap = {};
+
+  void _generateEventMap(List<Trip> trips) {
+    _eventMap.clear();
+    for (var trip in trips) {
+      final date = DateTime(
+        trip.dateRange.start.year,
+        trip.dateRange.start.month,
+        trip.dateRange.start.day,
+      );
+      final eventText = '${trip.title} (${trip.location})';
+
+      if (_eventMap[date] != null) {
+        _eventMap[date]!.add(eventText);
+      } else {
+        _eventMap[date] = [eventText];
+      }
+    }
+
+    setState(() {}); // supaya eventMap ter-refresh di tampilan
+  }
 
   @override
   void initState() {
@@ -45,21 +69,17 @@ class _HomePageState extends State<HomePage> {
     if (_userId != null) {
       final client = GraphQLProvider.of(context).value;
 
-      const String query = r'''
-        query GetUser($id: ID!) {
-          user(id: $id) {
-            id
-            nama
-          }
-        }
-      ''';
-
       final result = await client.query(
-        QueryOptions(document: gql(query), variables: {'id': _userId}),
+        QueryOptions(
+          document: gql(UserQueries.GetUser),
+          variables: {'id': _userId},
+          fetchPolicy: FetchPolicy.noCache, // tambahkan ini
+        ),
       );
 
       if (!result.hasException && result.data != null) {
-        final newName = result.data!['user']['nama'];
+        final newName = result.data!['users'][0]['nama'];
+
         await prefs.setString(
           'nama',
           newName,
@@ -87,38 +107,25 @@ class _HomePageState extends State<HomePage> {
     if (userId == null) return;
 
     final client = GraphQLProvider.of(context).value;
-    const String getTripsQuery = """
-      query TripsByUser(\$userId: ID!) {
-        trips(user_id: \$userId) {
-          id
-          title
-          location
-          remarks
-          start_date
-          end_date
-        }
-      }
-    """;
 
     final result = await client.query(
       QueryOptions(
-        document: gql(getTripsQuery),
+        document: gql(MyTripQueries.getTripsQuery),
         variables: {'userId': userId},
         fetchPolicy: FetchPolicy.noCache,
+        pollInterval: const Duration(seconds: 5),
       ),
     );
 
     if (!result.hasException) {
-      final rawTrips = result.data?['trips'] ?? [];
-      final parsedTrips =
-          rawTrips.map<Trip>((json) => Trip.fromJson(json)).toList();
+      final tripsData = result.data?['trips'] as List<dynamic>;
+      final updatedTrips = tripsData.map((t) => Trip.fromJson(t)).toList();
+
       setState(() {
-        _tripList = parsedTrips;
-        _isLoadingTrips = false;
+        parsedTrips = updatedTrips;
       });
-    } else {
-      debugPrint(result.exception.toString());
-      setState(() => _isLoadingTrips = false);
+
+      _generateEventMap(updatedTrips);
     }
   }
 
@@ -160,9 +167,12 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddTourPage()),
-          );
+          ).then((_) {
+            fetchUserTrips(); // Refresh data trip setelah kembali dari AddTourPage
+          });
         },
-        tripList: _tripList, // ⬅️ Tambahkan ini
+
+        tripList: parsedTrips, // ⬅️ Tambahkan ini
         isLoadingTrips: _isLoadingTrips, // ✅ tambahkan ini
       ),
       DreamDestinationPage(),
@@ -445,7 +455,7 @@ class _HomeContentState extends State<HomeContent> {
 
               // Tambahkan ini:
               eventLoader: (day) {
-                return tripList
+                return widget.tripList
                     .where((trip) {
                       return !day.isBefore(trip.dateRange.start) &&
                           !day.isAfter(trip.dateRange.end);

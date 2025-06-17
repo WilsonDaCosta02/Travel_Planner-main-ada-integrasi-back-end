@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:project_travelplanner/graphql/mutation/registerUser.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -16,23 +17,12 @@ class _RegisterState extends State<Register> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final String createUserMutation = """
-mutation CreateUser(\$nama: String!, \$no_hp: String, \$email: String!, \$password: String!) {
-  createUser(nama: \$nama, no_hp: \$no_hp, email: \$email, password: \$password) {
-    id
-    nama
-    no_hp
-    email
-  }
-}
-""";
-
   Future<void> registerUser() async {
     final client = GraphQLProvider.of(context).value;
 
     final result = await client.mutate(
       MutationOptions(
-        document: gql(createUserMutation),
+        document: gql(RegisterUser.createUserMutation),
         variables: {
           'nama': nameController.text,
           'no_hp': phoneController.text,

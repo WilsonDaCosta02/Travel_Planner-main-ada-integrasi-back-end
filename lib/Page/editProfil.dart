@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:project_travelplanner/graphql/mutation/editProfil.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -210,28 +211,9 @@ class _EditProfilPageState extends State<EditProfilPage> {
 
     final client = GraphQLProvider.of(context).value;
 
-    const String mutation = r'''
-    mutation UpdateUser($id: ID!, $nama: String, $no_hp: String, $email: String, $password: String, $foto: String) {
-      updateUser(
-        id: $id,
-        nama: $nama,
-        no_hp: $no_hp,
-        email: $email,
-        password: $password,
-        foto: $foto
-      ) {
-        id
-        nama
-        no_hp
-        email
-        foto
-      }
-    }
-  ''';
-
     final result = await client.mutate(
       MutationOptions(
-        document: gql(mutation),
+        document: gql(EditprofilMutation.mutation),
         variables: {
           'id': widget.userId,
           'nama': _nameController.text,

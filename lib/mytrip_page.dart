@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_travelplanner/graphql/query/myTrip.dart';
 import 'trip_model.dart';
 import 'package:intl/intl.dart';
 import 'tour_detail_page.dart';
@@ -13,19 +14,6 @@ class MytripPage extends StatefulWidget {
 }
 
 class _MytripPageState extends State<MytripPage> {
-  final String getTripsQuery = """
-    query TripsByUser(\$userId: ID!) {
-      trips(user_id: \$userId) {
-        id
-        title
-        location
-        remarks
-        start_date
-        end_date
-      }
-    }
-  """;
-
   List<Trip> trips = [];
   bool isLoading = true;
 
@@ -43,9 +31,9 @@ class _MytripPageState extends State<MytripPage> {
 
     final QueryResult result = await client.query(
       QueryOptions(
-        document: gql(getTripsQuery),
+        document: gql(MyTripQueries.getTripsQuery),
         variables: {'userId': userId},
-        fetchPolicy: FetchPolicy.noCache, // ⬅️ Tambahkan baris ini
+        fetchPolicy: FetchPolicy.noCache,
       ),
     );
 

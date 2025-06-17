@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_travelplanner/graphql/mutation/addTrip.dart';
 import 'package:project_travelplanner/home.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -30,30 +31,6 @@ class _AddTourPageState extends State<AddTourPage> {
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
-
-  final String createTripMutation = """
-  mutation CreateTrip(
-    \$user_id: ID!,
-    \$title: String!,
-    \$location: String!,
-    \$remarks: String,
-    \$start_date: String!,
-    \$end_date: String!
-  ) {
-    createTrip(
-      user_id: \$user_id,
-      title: \$title,
-      location: \$location,
-      remarks: \$remarks,
-      start_date: \$start_date,
-      end_date: \$end_date
-    ) {
-      id
-      title
-      location
-    }
-  }
-""";
 
   @override
   void dispose() {
@@ -128,7 +105,7 @@ class _AddTourPageState extends State<AddTourPage> {
 
                       final result = await client.mutate(
                         MutationOptions(
-                          document: gql(createTripMutation),
+                          document: gql(AddTripMutation.createTripMutation),
                           variables: {
                             'user_id': userId.toString(),
                             'title': _tourAboutController.text,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:project_travelplanner/graphql/query/getUser.dart';
 import 'Page/editProfil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
@@ -40,22 +41,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> fetchUserData(String userId) async {
     final client = GraphQLProvider.of(context).value;
 
-    const String query = r'''
-      query GetUser($id: ID) {
-        users(id: $id) {
-          id
-          nama
-          no_hp
-          email
-          password
-          foto
-        }
-      }
-    ''';
-
     final result = await client.query(
       QueryOptions(
-        document: gql(query),
+        document: gql(UserQueries.GetUser),
         variables: {'id': userId},
         fetchPolicy: FetchPolicy.networkOnly,
       ),

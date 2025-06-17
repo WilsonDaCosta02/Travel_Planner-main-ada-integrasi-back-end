@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart'; // Mengimpor library Material Design untuk membangun UI aplikasi Flutter.
+import 'package:project_travelplanner/graphql/mutation/login.dart';
 import 'register.dart'; // Mengimpor file `register.dart`, yang kemungkinan berisi implementasi halaman registrasi.
 import 'home.dart'; // Mengimpor file `home.dart`, yang kemungkinan berisi implementasi halaman utama aplikasi.
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -47,20 +48,10 @@ class _LoginState extends State<Login> {
       return;
     }
 
-    const String loginMutation = r'''
-    mutation Login($email: String!, $password: String!) {
-      login(email: $email, password: $password) {
-        id
-        nama
-        email
-      }
-    }
-  ''';
-
     final client = GraphQLProvider.of(context).value;
     final result = await client.mutate(
       MutationOptions(
-        document: gql(loginMutation),
+        document: gql(LoginMutation.loginMutation),
         variables: {'email': email, 'password': password},
       ),
     );
