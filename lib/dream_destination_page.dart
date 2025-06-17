@@ -251,38 +251,40 @@ class _DreamDestinationPageState extends State<DreamDestinationPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
                       onTap: () => _showActionOptions(index),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height:
-                                600, // Sesuaikan tinggi sesuai kebutuhan kamu
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child:
-                                  isAsset
-                                      ? Image.asset(
-                                        imagePath,
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                      )
-                                      : Image.file(
-                                        File(imagePath),
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height:
+                                  600, // ganti dari 600 jadi lebih kecil agar aman
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child:
+                                    isAsset
+                                        ? Image.asset(
+                                          imagePath,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                        )
+                                        : Image.file(
+                                          File(imagePath),
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                        ),
+                              ),
                             ),
-                          ),
-
-                          SizedBox(height: 10),
-                          Text(
-                            item['name']!,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                            SizedBox(height: 10),
+                            Text(
+                              item['name']!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -290,37 +292,47 @@ class _DreamDestinationPageState extends State<DreamDestinationPage> {
                   // Card tambah destinasi
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: GestureDetector(
-                      onTap: () => _showDestinationDialog(),
+                    child: Center(
+                      // Tambahkan ini agar kontennya berada di tengah
                       child: Column(
+                        mainAxisSize:
+                            MainAxisSize
+                                .min, // Supaya tinggi column menyesuaikan
                         children: [
-                          SizedBox(
-                            height: 600,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
+                          GestureDetector(
+                            onTap: () => _showDestinationDialog(),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 370,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 80,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  Icons.add,
-                                  size: 80,
-                                  color: Colors.white,
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Tambah Lokasi',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            'Tambah Lokasi',
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                              ],
                             ),
                           ),
                         ],
