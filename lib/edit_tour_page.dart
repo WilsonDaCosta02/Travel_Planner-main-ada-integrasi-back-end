@@ -5,11 +5,8 @@ import 'package:project_travelplanner/graphql/mutation/deleteTrip.dart';
 import 'package:project_travelplanner/graphql/mutation/updateTrip.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'trip_model.dart';
-import 'trip_data.dart';
 import 'home.dart';
 import 'dart:ui'; // For ImageFilter
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class EditTourPage extends StatefulWidget {
   final Trip trip;

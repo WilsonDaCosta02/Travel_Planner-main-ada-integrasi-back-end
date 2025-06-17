@@ -30,9 +30,9 @@ class _HomePageState extends State<HomePage> {
 
   // ✅ Tambahkan di sini
   List<Trip> parsedTrips = [];
-  bool _isLoadingTrips = true;
+  final bool _isLoadingTrips = true;
 
-  Map<DateTime, List<String>> _eventMap = {};
+  final Map<DateTime, List<String>> _eventMap = {};
 
   void _generateEventMap(List<Trip> trips) {
     _eventMap.clear();
