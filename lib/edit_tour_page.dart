@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:project_travelplanner/graphql/mutation/deleteTrip.dart';
+import 'package:project_travelplanner/graphql/mutation/updateTrip.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'trip_model.dart';
 import 'trip_data.dart';
@@ -286,24 +289,38 @@ class _EditTourPageState extends State<EditTourPage> {
           ),
           icon: const Icon(Icons.update),
           label: const Text('Update'),
-          onPressed: () {
+          onPressed: () async {
             if (_rangeStart != null && _rangeEnd != null) {
-              final updatedTrip = Trip(
-                title: _tourAboutController.text,
-                location: _locationController.text,
-                remarks: _remarksController.text,
-                dateRange: DateTimeRange(start: _rangeStart!, end: _rangeEnd!),
-              );
+              final client = GraphQLProvider.of(context).value;
 
-              tripList[widget.tripIndex] = updatedTrip;
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomePage(initialTabIndex: 2),
+              final result = await client.mutate(
+                MutationOptions(
+                  document: gql(Updatetrip.updateTripMutation),
+                  variables: {
+                    'id': widget.trip.id,
+                    'title': _tourAboutController.text,
+                    'location': _locationController.text,
+                    'remarks': _remarksController.text,
+                    'start_date': _rangeStart!.toIso8601String(),
+                    'end_date': _rangeEnd!.toIso8601String(),
+                  },
                 ),
-                (route) => false,
               );
+
+              if (!result.hasException) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(initialTabIndex: 2),
+                  ),
+                  (route) => false,
+                );
+              } else {
+                print(result.exception.toString());
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Update failed')));
+              }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Please select a date range!')),
@@ -359,17 +376,30 @@ class _EditTourPageState extends State<EditTourPage> {
                 child: const Text('No', style: TextStyle(color: Colors.black)),
               ),
               TextButton(
-                onPressed: () {
-                  setState(() {
-                    tripList.removeAt(widget.tripIndex);
-                  });
+                onPressed: () async {
+                  final client = GraphQLProvider.of(context).value;
 
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(initialTabIndex: 2),
+                  final result = await client.mutate(
+                    MutationOptions(
+                      document: gql(Deletetrip.deleteTripMutation),
+                      variables: {'id': widget.trip.id},
                     ),
-                    (route) => false,
                   );
+
+                  if (!result.hasException &&
+                      result.data?['deleteTrip'] == true) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(initialTabIndex: 2),
+                      ),
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.of(context).pop(); // Close the dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Delete failed')),
+                    );
+                  }
                 },
                 child: const Text('Yes', style: TextStyle(color: Colors.red)),
               ),

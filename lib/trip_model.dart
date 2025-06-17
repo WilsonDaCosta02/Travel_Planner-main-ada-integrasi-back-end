@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class Trip {
+  final String id;
   final String title;
   final String location;
   final String remarks;
   final DateTimeRange dateRange;
 
   Trip({
+    required this.id,
     required this.title,
     required this.location,
     required this.remarks,
@@ -18,6 +20,7 @@ class Trip {
     final end = DateTime.parse(json['end_date']);
 
     return Trip(
+      id: json['id'].toString(),
       title: json['title'],
       location: json['location'],
       remarks: json['remarks'],
