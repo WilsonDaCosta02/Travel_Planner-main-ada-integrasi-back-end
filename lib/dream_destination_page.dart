@@ -294,7 +294,7 @@ class _DreamDestinationPageState extends State<DreamDestinationPage> {
                                   ), // sesuaikan jika ID asli tersedia di list
                                   name: nameController.text,
                                   newImageFile: localPickedImage,
-                                  existingBase64Image: existing?['image'],
+                                  existingBase64Image: existing['image'],
                                 );
                                 Navigator.of(context).pop();
                               } else {
