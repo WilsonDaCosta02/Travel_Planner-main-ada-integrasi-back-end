@@ -14,6 +14,7 @@ import 'tour_detail_page.dart';
 import 'trip_model.dart';
 
 class HomePage extends StatefulWidget {
+
   final int initialTabIndex;
   const HomePage({super.key, this.initialTabIndex = 0});
 
@@ -175,7 +176,7 @@ class _HomePageState extends State<HomePage> {
         tripList: parsedTrips, // ⬅️ Tambahkan ini
         isLoadingTrips: _isLoadingTrips, // ✅ tambahkan ini
       ),
-      DreamDestinationPage(),
+      DreamDestinationPage(userId: _userId!),
       MytripPage(),
       ProfilePage(userId: _userId!, onProfileUpdated: _loadUserData),
     ];

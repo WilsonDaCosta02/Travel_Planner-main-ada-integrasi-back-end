@@ -88,7 +88,10 @@ class _LoginState extends State<Login> {
   }
 
   void _showForgotPasswordDialog(BuildContext context) {
-    TextEditingController emailController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController confirmPasswordController =
+        TextEditingController();
 
     showDialog(
       context: context,
@@ -99,94 +102,214 @@ class _LoginState extends State<Login> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Judul
-                const Text(
-                  'Forgot password',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                // Subjudul
-                const Text(
-                  'Please enter your email to reset the password',
-                  style: TextStyle(color: Color.fromARGB(255, 69, 63, 63)),
-                ),
-                const SizedBox(height: 20),
-                // Label email
-                const Text(
-                  'Your Email',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 5),
-                // Input email
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Judul
+                  const Text(
+                    'Forgot Password',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 20),
-                // Tombol Reset Password
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 114, 33, 243),
-                      shape: RoundedRectangleBorder(
+                  const SizedBox(height: 8),
+
+                  // Subjudul
+                  const Text(
+                    'Please enter your email and new password',
+                    style: TextStyle(color: Color.fromARGB(255, 69, 63, 63)),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Label Email
+                  const Text(
+                    'Your Email',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 5),
+
+                  // Input Email
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your email',
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
                     ),
-                    onPressed: () {
-                      String email = emailController.text.trim();
-                      if (email.isNotEmpty) {
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Label New Password
+                  const Text(
+                    'New Password',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 5),
+
+                  // Input Password
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Enter new password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Label Confirm Password
+                  const Text(
+                    'Confirm Password',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 5),
+
+                  // Input Confirm Password
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Confirm new password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Tombol Submit
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          114,
+                          33,
+                          243,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        const String resetPasswordMutation = """
+                        mutation ResetPassword(\$email: String!, \$password: String!) {
+                          resetPassword(email: \$email, password: \$password)
+                        }
+                      """;
+
+                        String email = emailController.text.trim();
+                        String password = passwordController.text.trim();
+                        String confirmPassword =
+                            confirmPasswordController.text.trim();
+
+                        if (email.isEmpty ||
+                            password.isEmpty ||
+                            confirmPassword.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Semua field wajib diisi!'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (password != confirmPassword) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Password tidak cocok'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          final client = GraphQLProvider.of(context).value;
+
+                          final result = await client.mutate(
+                            MutationOptions(
+                              document: gql(resetPasswordMutation),
+                              variables: {'email': email, 'password': password},
+                            ),
+                          );
+
+                          if (result.hasException) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(result.exception.toString()),
+                              ),
+                            );
+                            return;
+                          }
+
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result.data?['resetPassword'] ??
+                                    'Reset password berhasil untuk $email',
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Terjadi kesalahan: $e')),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Tombol Cancel
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          189,
+                          117,
+                          10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Link reset dikirim ke $email'),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Submit',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 255, 255, 255),
+                      },
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                // Tombol Cancel
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 189, 117, 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 255, 253, 253),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

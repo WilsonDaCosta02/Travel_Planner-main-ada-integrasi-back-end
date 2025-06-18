@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_travelplanner/graphql/mutation/addTrip.dart';
+import 'package:project_travelplanner/graphql/mutation/Trip.dart';
 import 'package:project_travelplanner/home.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -126,7 +126,7 @@ class _AddTourPageState extends State<AddTourPage> {
 
                       final result = await client.mutate(
                         MutationOptions(
-                          document: gql(AddTripMutation.createTripMutation),
+                          document: gql(TripMutation.createTripMutation),
                           variables: {
                             'user_id': userId.toString(),
                             'title': _tourAboutController.text,

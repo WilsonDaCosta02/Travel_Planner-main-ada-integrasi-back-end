@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:project_travelplanner/graphql/mutation/deleteTrip.dart';
-import 'package:project_travelplanner/graphql/mutation/updateTrip.dart';
+import 'package:project_travelplanner/graphql/mutation/Trip.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'trip_model.dart';
 import 'home.dart';
@@ -349,7 +348,7 @@ class _EditTourPageState extends State<EditTourPage> {
 
               final result = await client.mutate(
                 MutationOptions(
-                  document: gql(Updatetrip.updateTripMutation),
+                  document: gql(TripMutation.updateTripMutation),
                   variables: {
                     'id': widget.trip.id,
                     'title': _tourAboutController.text,
@@ -435,7 +434,7 @@ class _EditTourPageState extends State<EditTourPage> {
 
                   final result = await client.mutate(
                     MutationOptions(
-                      document: gql(Deletetrip.deleteTripMutation),
+                      document: gql(TripMutation.deleteTripMutation),
                       variables: {'id': widget.trip.id},
                     ),
                   );
