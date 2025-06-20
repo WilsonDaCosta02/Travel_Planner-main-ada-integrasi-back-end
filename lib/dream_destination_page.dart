@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'dart:convert'; // untuk base64
+import 'dart:convert'; 
 import 'package:project_travelplanner/graphql/mutation/DreamDestination.dart';
 import 'package:project_travelplanner/graphql/query/DreamDestination.dart';
 
