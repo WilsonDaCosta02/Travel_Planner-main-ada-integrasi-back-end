@@ -5,6 +5,8 @@ import 'package:project_travelplanner/graphql/query/getUser.dart';
 import 'Page/editProfil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -28,6 +30,51 @@ class _ProfilePageState extends State<ProfilePage> {
   String? password;
   bool isLoading = true;
   bool _isInit = true;
+
+  late WebSocketChannel channel;
+
+  String? _lastTripMessage;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Ganti IP ke '10.0.2.2' jika pakai emulator Android
+    channel = IOWebSocketChannel.connect(
+      'ws://10.0.2.2:4000?userId=${widget.userId}',
+    );
+
+    channel.stream.listen((message) {
+      try {
+        final decoded = jsonDecode(message);
+
+        if (decoded['type'] == 'NOTIF') {
+          final msg = decoded['message'];
+
+          final String displayMessage =
+              msg is String
+                  ? msg
+                  : 'Hai 👋 ${msg['nama']}, trip ke ${msg['location']} akan berangkat dalam 3 hari.';
+
+          setState(() {
+            _lastTripMessage = displayMessage;
+          });
+
+          showTripNotification(context, displayMessage);
+        }
+      } catch (e, stack) {
+        print('❌ WebSocket error: $e');
+        print(stack);
+      }
+    });
+  }
+
+  // 👇 Tambahkan di sini
+  @override
+  void dispose() {
+    channel.sink.close();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -96,6 +143,53 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void showTripNotification(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.only(bottom: 750, left: 10, right: 10),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.cyan,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.flight_takeoff, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +223,27 @@ class _ProfilePageState extends State<ProfilePage> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Icon(Icons.notifications_none),
+                                      IconButton(
+                                        icon: const Icon(Icons.notifications),
+                                        onPressed: () {
+                                          if (_lastTripMessage != null) {
+                                            showTripNotification(
+                                              context,
+                                              _lastTripMessage!,
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Belum ada notifikasi.',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
                                       const Text(
                                         'Profil',
                                         style: TextStyle(
